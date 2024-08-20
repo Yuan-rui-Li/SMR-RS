@@ -1,0 +1,8 @@
+addict
+yapf
+regex
+pycocotools
+mmcv-full
+terminaltables
+thop
+pandas
