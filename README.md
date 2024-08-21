@@ -1,5 +1,5 @@
 # SMR-RS:一个专门用于稻茬行分割的简化版Mask R-CNN神经网络模型
-`首先欢迎来到我的仓库 :clap: :clap: :clap:这是我的第一个仓库。:sunglasses:`
+首先欢迎来到我的仓库 :clap: :clap: :clap: 这是我的第一个仓库 :sunglasses:
 ## 项目简介
 正如标题所述,这是一个介绍深度学习模型的项目，这个模型用于对稻茬行图片进行实例分割，模型名字叫[SMR-RS](https://www.mdpi.com/2076-3417/13/16/9136 "论文地址")，模型代码是基于[mmdetection](https://github.com/open-mmlab/mmdetection "mmdetection")的1.x版本，我把仅需要用到的代码给剔除了出来，所以即使你不安装也能运行，但是需要额外下载[requirements.txt](/requirements.txt)中的依赖包，由于这是本人做的第一个项目，可能存在一些意想不到的bug，如果存在疑问，[请联系我](2812344948@qq.com "2812344948@qq.com")。
 ### SMR-RS模型介绍
