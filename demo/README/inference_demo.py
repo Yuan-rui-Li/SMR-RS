@@ -230,6 +230,10 @@ def show_anchors_proposals(cfg:dict,
             bbox = ele[0]
             mask = ele[1].cpu().numpy()
             img_blend = mask_blend(image.copy(), mask, color=colors[i])
+            if i == 0:
+                last_blend=img_blend
+            if i>0:
+                last_blend=mask_blend(last_blend, mask, color=colors[i])
             img_blend = cv2.copyMakeBorder(img_blend, 30, 30, 30, 30, cv2.BORDER_CONSTANT, value=pad_color)
             attach_bbox(img_blend,
                         bbox+30,
@@ -242,24 +246,27 @@ def show_anchors_proposals(cfg:dict,
             if proposals_masks_path is not None:
                 path = new_path(proposals_masks_path, i)
                 img_blend.save(path)
+        if blend_path is not None:
+            last_blend = Image.fromarray(last_blend)
+            last_blend.save(blend_path)
 
         # bboxes = torch.tensor(bboxes)
-        #显示最终掩膜
-        masks_sum=copy.deepcopy(masks[0])
-        for i in range(len(masks)-1):
-            masks_sum|=masks[i+1]
-        mask = masks_sum.cpu().numpy()
-        img_blend = mask_blend(image.copy(), mask, alpha=0.3, color=(249,125,28))
-        img_blend = Image.fromarray(img_blend)
-        img_blend.show()
-        if blend_path is not None:
-                img_blend.save(blend_path)
+        # #显示最终掩膜
+        # masks_sum=copy.deepcopy(masks[0])
+        # for i in range(len(masks)-1):
+        #     masks_sum|=masks[i+1]
+        # mask = masks_sum.cpu().numpy()
+        # img_blend = mask_blend(image.copy(), mask, alpha=0.3, color=(249,125,28))
+        # img_blend = Image.fromarray(img_blend)
+        # img_blend.show()
+        # if blend_path is not None:
+        #         img_blend.save(blend_path)
 
         #显示最终掩膜与边框
         #显示合并后的proposals
         bboxes = results['bboxes'][0][0].cpu().numpy()
         #padding
-        img, bboxes = bbox2pad(bboxes, np.array(img_blend), pad_color=pad_color)
+        img, bboxes = bbox2pad(bboxes, np.array(last_blend), pad_color=pad_color)
         show_bboxes(bboxes, 
                     img,
                     merge_bboxes=True,
@@ -373,7 +380,7 @@ def main():
     blend_path = os.path.join(base_path,folder_name,'mask_blend.jpg')
     )
     #要推理的图片
-    img_file = './demo/images/test_images/0211.jpg'
+    img_file = './demo/test/00.jpg'
     #设置权重和配置文件的保存路径
     #SMR-RS
     cfg_1 = dict(cfg_file = './configs/infer_cfg/SMR/my_custom_config_simple_18_3.py',
@@ -384,11 +391,11 @@ def main():
                 checkpoint_file = './train_results/simple/epoch_23.pth',
                 img_file = img_file)
     #SMR-RS-MN3
-    cfg_2 = dict(cfg_file = './configs/infer_cfg/SMR/my_custom_config_simple_22.py',
+    cfg_3 = dict(cfg_file = './configs/infer_cfg/SMR/my_custom_config_simple_22.py',
                 checkpoint_file = './train_results/simple/epoch_22.pth',
                 img_file = img_file)
     #SMR-RS_v2
-    cfg_3 = dict(cfg_file = './configs/infer_cfg/SMRv2/my_custom_config_simple_v2_01.py',
+    cfg_4 = dict(cfg_file = './configs/infer_cfg/SMRv2/my_custom_config_simple_v2_01.py',
                 checkpoint_file = './train_results/simple_v2/epoch_01.pth',
                 img_file = img_file) 
 
@@ -405,7 +412,8 @@ def main():
     @data_demo
         加载数据集并获取数据集中的指定信息,具体请查看代码
     '''
-    
+    #data_demo(cfg=cfg_2)
+    #backbone_neck_Demo(cfg = cfg_2)
     show_anchors_proposals(cfg = cfg_2, save_paths = save_paths, show_all_anchors = False)
     return
 

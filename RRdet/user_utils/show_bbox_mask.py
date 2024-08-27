@@ -10,6 +10,7 @@ from .draw_bbox import attach_bbox, put_Text
 from .image import mask_blend
 from .file import new_path
 
+
 def show_bboxes(bboxes:np.ndarray,
                 image:Tuple[np.ndarray, str]=None,
                 merge_bboxes:bool=True,
@@ -19,8 +20,11 @@ def show_bboxes(bboxes:np.ndarray,
                 bbox_line_width:int=3,
                 save_path:str=None,
                 show_coners:bool=True):
-    if not os.path.exists(os.path.split(save_path)[0]):
-        os.makedirs(os.path.split(save_path)[0],exist_ok=True)
+    if save_path is not None:
+        if not os.path.exists(os.path.split(save_path)[0]):
+            os.makedirs(os.path.split(save_path)[0],exist_ok=True)
+    else:
+        save_path = 'anchors_show.jpg'
         
     if type(bbox_color) is tuple: bbox_color=[bbox_color]
 
@@ -29,7 +33,7 @@ def show_bboxes(bboxes:np.ndarray,
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     num_bboxes = len(bboxes)
-    if num_bboxes > 12 and bbox_color is not None: 
+    if num_bboxes > len(bbox_color) and bbox_color is not None: 
         print("Colors is not enough, please add some colors.")
         return
     if len(bboxes.shape) == 1:
@@ -51,6 +55,7 @@ def show_bboxes(bboxes:np.ndarray,
         img.show()
         if save_path is not None:
             img.save(save_path)
+            print(f'Result saved at {save_path}.')
     
     else:
         for i, bbox in enumerate(bboxes):
@@ -66,8 +71,9 @@ def show_bboxes(bboxes:np.ndarray,
             img = Image.fromarray(img)
             img.show()
             if save_path is not None:
-                new_path = new_path(save_path, i)
+                new_path = 'i_'+save_path
                 img.save(new_path)
+                print(f'Result saved at {new_path}.')
 
 
 

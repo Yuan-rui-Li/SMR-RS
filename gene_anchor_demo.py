@@ -7,13 +7,17 @@ from RRdet.user_utils import show_bboxes
 from RRdet.core.anchor import AnchorGenerator,anchor_inside_flags
 from RRdet.user_utils import random_choice
 
+colors = [(50, 255, 50), (10, 10, 255), (255,10,10), (10, 10, 255), (65, 105, 225), (135, 206, 235),
+                  (162, 205, 90), (255, 246, 143), (238, 238, 209), (188, 143, 143), (222, 184, 135), (205, 85, 85)]
 
 def gene_anchors(imgDir:str,
                  image_heigt:int,
                  image_width:int,
                  scales:list[int],
                  ratios:list[int],
-                 strides:list[int]):
+                 strides:list[int],
+                 num_choices:int=10,
+                 featmap_sizes:list = [(270, 480),(135, 24),(68, 120),(34, 60)]):
     
     cfg = dict( scales=scales,
                 ratios=ratios,
@@ -26,9 +30,7 @@ def gene_anchors(imgDir:str,
     # base_height=[19,19,19,19],#每个featuremap上bbox基本高度
     # base_width=[5.4,5.4,7.5,10.8],#每个featuremap上bbox基本宽度
     # centers = [(4,4),(8,8),(16,16),(32,32)],
-    '''
-    gene_anchor = AnchorGenerator(**cfg)
-    '''
+
     ---------''base_anchors''-------------
     @brief:base_anchors是在原图上每个位置生成的anchor组,anchor即bbox
     list(tensor([[tl_x,tl_y,br_x,br_y],...num_strides*num_ratios],...num_levels)],num_levels为featuremap的个数
@@ -46,11 +48,12 @@ def gene_anchors(imgDir:str,
     >>>            anchor_height = stride*h_ratio*scale
     >>>            anchor_width = stride*w_ratio*scale
     '''
+    gene_anchor = AnchorGenerator(**cfg)
     base_anchors = gene_anchor.base_anchors
     print(f"基础锚框的大小为:{base_anchors}")
 
     #假设的参数
-    featmap_sizes = [(270, 480),(135, 24),(68, 120),(34, 60)]
+    
 
     #list(tensor,...num_featuremaps)
     multi_level_anchors = gene_anchor.grid_priors(featmap_sizes, device='cpu')
@@ -78,34 +81,44 @@ def gene_anchors(imgDir:str,
     >>> print(num_inside_flags)
     >>> print(num_anchors_valid)
     '''
-    #随机抽取一定数量的anchors
-    num_choice=10
-    random_anchors_index = random_choice(num_choice,num_gallery=num_anchors_valid)
+
+    random_anchors_index = random_choice(num_choices,num_gallery=num_anchors_valid)
     random_anchors = anchors_valid[random_anchors_index]
 
     if isinstance(random_anchors,torch.Tensor):
         random_anchors = random_anchors.cpu().numpy()
-    show_bboxes(random_anchors,imgDir)
+    show_bboxes(random_anchors,imgDir,bbox_color=colors)
 
 
 
 
 def main():
+   #以下均为默认参数
     #要把锚框绘制到哪张图片上
-    imgDir = './demo/test//00.jpg'
+    imgDir = 'demo/test/00.jpg'
+
     #填写该图片的尺寸信息
     image_heigt=1920
     image_width=1080
+
     #设置锚框的要生成锚框的基本信息
-    scales=[100],
-    ratios=[1],
-    strides=[4, 8, 16, 32]
+    scales=[100],#锚框面积
+    ratios=[0.5,1,2],#锚框比例
+    strides=[4, 8, 16, 32]#不同特征图上锚框分布的间距,要和特征图的个数相同
+
+    #设置输入rpn中特征图的大小，一个元组代表一个特征图
+    featmap_sizes = [(270, 480),(135, 24),(68, 120),(34, 60)]
+    #显示多少个锚框
+    num_choices=10
+    
     gene_anchors(imgDir,
                  image_heigt,
                  image_width,
                  scales,
                  ratios,
-                 strides)
+                 strides,
+                 num_choices,
+                 featmap_sizes)
 
 if __name__ == '__main__':
     main()
